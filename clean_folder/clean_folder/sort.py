@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys
 import shutil
-from .normalize import normalise
+from .normalize import normalize
 
 
 archives = 'archives'
@@ -14,27 +14,20 @@ EXTENSIONS = {
     archives: ['.zip', '.gz', '.tar']
 }
 
-###################################
 
 def move(file:Path, path:Path, category:str):
 
     if category == 'unknown':
-
         return file.replace(path.joinpath(file.name))
 
     path_to_k = path.joinpath(category)
 
     if not path_to_k.exists():
-
         path_to_k.mkdir()
 
-        file_stem = normalise(file.stem)
-
+    file_stem = normalize(file.stem)
     return file.replace(path_to_k.joinpath(f'{file_stem}{file.suffix}'))
 
-###################################
-
-###################################
 
 def get_categories(file:Path):
 
@@ -48,9 +41,6 @@ def get_categories(file:Path):
     
     return 'unknown'
 
-###################################
-
-###################################
 
 def sort(path:Path, current_dir:Path):
 
@@ -59,73 +49,51 @@ def sort(path:Path, current_dir:Path):
         if item.is_file():
 
             category = get_categories(item)
-
-            new_path = move(item, path, category)
+            move(item, path, category)
         
         else:
 
             sort(path, item)
-
             item.rmdir()
 
-###################################
-
-###################################
 
 def unpack(path:Path, arc_name:Path, extension:str ):
 
     f_unpack = path / arc_name.stem
-
     f_unpack.mkdir
-
     shutil.unpack_archive(arc_name, f_unpack, extension)
 
-###################################
 
-###################################
 def unpack_in(archive:Path, s_dict:dict):
 
     for arc in archive.glob('?*.*'):
-
         extension = arc.suffix
 
-
-    
     if extension in s_dict[archive.name]:
 
         extension = extension.split('.')[1]
-
         unpack(archive, arc, extension)
   
-###################################
 
-###################################
 def main():
 
     try:
         path = Path(sys.argv[1])
 
     except IndexError:
-
-        return f'No path to folder. Take as parameter'
+        return 'No path to folder. Take as parameter'
     
     if not path.exists():
-
-        return 'Sorry, folder not exists'
+        return 'Sorry, folder does not exist'
     
     sort(path, path)
-    
 
     archive = path / archives
-
     unpack_in(archive, EXTENSIONS )
 
-###################################
+    return 'File sorting completed successfully'
 
-###################################
 
 if __name__ == '__main__':
+   print(main())
 
-   print( main())
-
-###################################
